@@ -44,6 +44,23 @@ const blog = (await getCollection("blog"))
             </li>
           ))}
         </ul>
+        <article class="space-y-4">
+          <p>
+            Plusieurs sujets en attente :
+          </p>
+
+          <ul>
+            <li>Un simple FCN, optimisé par descente de gradient, avec seulement numpy. 
+              L'occasion d'introduire le calcul différentiel matriciel (et peut être tensoriel), 
+              et de parler de brackpropagation de gradient sur un exemple explicite
+            </li>
+            <li>Diffusion</li>
+            <li>Introduction au framework torch + lighting + hydra - faire du ml avec une codebase decente</li>
+            <li>La descente de gradient stochastique, abstraite</li>
+            <li>La régularisation implicite dans les réseaux de neuronnes - pourquoi on overfit pas ?</li>
+            <li>Strided arrays - <code>.as_strided()</code> et <code>.einsum()</code> tricks</li>
+          </ul>
+        </article>
       </section>
 
       <section class="animate space-y-4">
