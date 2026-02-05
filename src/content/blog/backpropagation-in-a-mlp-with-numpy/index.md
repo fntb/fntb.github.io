@@ -4,7 +4,7 @@ description: "Intuition et calcul différentiel pour la backpropagation automati
 date: "Jan 23 2025"
 ---
 
-L'objectif va être de d'illustrer la backpropagation **non**-automatique avec `numpy` en réimplémentant l'apprentissage d'un réseau de neuronne simple par un algorithme de descente de gradient.
+L'objectif va être d'illustrer la backpropagation **non**-automatique avec `numpy` en réimplémentant l'apprentissage d'un réseau de neuronne simple par un algorithme de descente de gradient.
 
 Pour ça je propose un cadre concret : le problème de la **classification multiple**, pour l'exemple on va prendre MNIST spécifiquement, avec la **perte logistique** (cross-entropy), et un modèle **Multi-Layer Perceptron (MLP)**, qu'on va optimiser par **descente de gradient minibatch (multipass)**.
 
