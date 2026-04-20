@@ -1,0 +1,28 @@
+---js
+const eleventyNavigation = {
+	key: "Blog",
+	order: 1
+};
+
+const numberOfLatestPostsToShow = 3;
+---
+
+
+<h1>Hello ! 👋</h1>
+
+<p>{{ metadata.description }}</p>
+
+<h2>Quelques sujets que j'aimerais aborder bientôt.</h2>
+
+<ul>
+<li>DDPMs</li>
+<li>Mécanismes d'attention, optimisation en-contexte, réf : https://arxiv.org/abs/2212.07677 + expérience "distillation is in-context t-SNE"</li>
+<li>Introduction à la descente de gradient stochastique abstraite</li>
+<li>La régularisation implicite dans les réseaux de neuronnes, réf : https://github.com/raphael-berthier/optim-notes/blob/main/notes.pdf</li>
+</ul>
+
+<h2>Articles les plus récents</h2>
+
+{% set postslist = collections.posts %}
+{% include "postslist.njk" %}
+
