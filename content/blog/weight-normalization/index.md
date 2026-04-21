@@ -5,8 +5,6 @@ const date = "2026-04-16";
 const draft = false;
 ---
 
-# Weight Normalization
-
 On s'intéresse à la weight normalization telle que présentée [dans _Weight Normalization: A Simple Reparameterization to Accelerate Training of Deep Neural Networks_, par Salimans et Kingma](https://arxiv.org/abs/1602.07868).
 
 ## Présentation
@@ -120,33 +118,42 @@ Au delà du préconditionnement du gradient, les techniques comme la batch norma
 
 A contrario la weight normalization n'a pas cette propriété. Les auteurs proposent une technique d'initialisation dépendante des données qui consiste à observer la préactivation de chaque couche sur un batch (comme la batch normalization) pour initialiser les poids.
 
-On considère une couche linéaire reparamétrée :
+Si l'on considère :
 
-$$y = g \frac{v}{\|v\|} x + b$$
+$$y = w x + b$$
 
-et on pose $u = \frac{v}{\|v\|} x$ pour obtenir $y = g u + b$
-
-On a alors :
+On a :
 
 $$
 \begin{align*}
-\mathbb{E}y &= g \mathbb{E}[ux] + b \\
-\operatorname{var} y &= g^2 \operatorname{var}[ux] \\
+\mathbb{E}y &= w \mathbb{E}x + b \\
+\operatorname{var} y &= w \operatorname{var}x w^\top \\
 \end{align*}
 $$
 
-Et donc en prenant :
+Et donc en supposant $\operatorname{var}x$ strictement positive (elle est déjà nécessairement positive), prendre
 
 $$
 \begin{align*}
-b' &= - g \mathbb{E}[ux] \\
-g' &= \frac{1}{\sqrt{\|\operatorname{var}[ux]\|}} \\
+w &=  (\operatorname{var}x)^{-\frac{1}{2}}\\
+b &= - w \mathbb{E}x \\
 \end{align*}
 $$
 
-On satisfait les contraintes $\mathbb{E} y = 0$ et $\| \operatorname{var} y \| = 1$.
+satisfait les contraintes $\mathbb{E} y = 0$ et $\operatorname{var} y = I$.
 
-Et pour estimer les inconnues $\mathbb{E}[ux]$ et $\operatorname{var}[ux]$, on peut simplement prendre les estimateurs de moyenne et variance empiriques sur un seul batch de données (comme le fait la batch normalization à chaque batch).
+On pose alors 
+
+$$
+\begin{align*}
+v &=  w\\
+g &=  \|w\|\\
+\end{align*}
+$$
+
+Evaluer $(\operatorname{var}x)^{-\frac{1}{2}}$ a une complexité en $O(\dim(x)^3)$, si l'on veut éviter ça on peut supposer la décorrélation de $x$ et prendre la matrice diagonale $(w_{i,j} = \delta_{i = j}\frac{1}{\sqrt{(\operatorname{var} x)_{i,j}}})_{i,j}$.
+
+Pour estimer les inconnues $\mathbb{E}x$ et $\operatorname{var}{x}$, on peut simplement prendre les estimateurs de moyenne et variance empiriques sur un batch de données (comme le fait la batch normalization).
 
 <div style="page-break-after: always"></div>
 

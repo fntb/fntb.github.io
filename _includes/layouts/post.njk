@@ -14,6 +14,18 @@ layout: layouts/base.njk
 	{%- endfor %}
 </ul>
 
+{% if status in ["todo", "wip"] %}
+<style>{% include "css/status.css" %}</style>
+<div class="status {{status}}">
+	{% if status == "wip" %}
+	<p><em>This acticle is a work in progress.</em></p>
+	{% endif %}
+	{% if status == "todo" %}
+	<p><em>This acticle is a todo and won't be published.</em></p>
+	{% endif %}
+</div>
+{% endif %}
+
 {{ content | safe }}
 
 {%- if collections.posts %}

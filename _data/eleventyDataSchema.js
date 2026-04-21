@@ -5,6 +5,7 @@ export default function() {
 	return function(data) {
 		let result = z.object({
 			draft: z.boolean().or(z.undefined()),
+			status: z.literal(["todo", "wip", "done"]).or(z.undefined()),
 		}).safeParse(data);
 
 		if(result.error) {

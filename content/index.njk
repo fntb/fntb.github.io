@@ -8,11 +8,18 @@ const numberOfLatestPostsToShow = 3;
 ---
 
 
-<h1>Hello ! 👋</h1>
+<h1>Hi !</h1>
 
 <p>{{ metadata.description }}</p>
 
-<h2>Quelques sujets que j'aimerais aborder bientôt.</h2>
+
+<h2>Articles récents</h2>
+
+{% set postslist = collections.posts %}
+{% include "postslist.njk" %}
+
+
+<h2>Articles à venir (avec un peu de chance)</h2>
 
 <ul>
 <li>DDPMs</li>
@@ -21,8 +28,10 @@ const numberOfLatestPostsToShow = 3;
 <li>La régularisation implicite dans les réseaux de neuronnes, réf : https://github.com/raphael-berthier/optim-notes/blob/main/notes.pdf</li>
 </ul>
 
-<h2>Articles les plus récents</h2>
+<h2>Resources, recommendations, challenges</h2>
 
-{% set postslist = collections.posts %}
-{% include "postslist.njk" %}
+<em>todo</em>
 
+<h2>Remerciements</h2>
+
+<em>todo</em>

@@ -3,6 +3,7 @@ const title = "UNet - Un banc de filtres appris ?";
 const description = "Pourquoi le U-Net fonctionne-t-il si bien ? Exploration de l'architecture à travers la théorie de l'approximation multirésolution.";
 const date = "2026-02-04";
 const draft = true;
+const status = "todo";
 ---
 
 Aujourd'hui je vais parler UNet.

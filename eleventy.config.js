@@ -18,12 +18,22 @@ export default async function(eleventyConfig) {
 	const mdIt = markdownIt(options).use(katex);
 	eleventyConfig.setLibrary("md", mdIt);
 
-	eleventyConfig.addPreprocessor("drafts", "*", (data, content) => {
-		if (data.draft) {
-			data.title = `${data.title} (draft)`;
+	// eleventyConfig.addPreprocessor("drafts", "*", (data, content) => {
+	// 	if (data.draft) {
+	// 		data.title = `${data.title} [draft]`;
+	// 	}
+
+	// 	if(data.draft && process.env.ELEVENTY_RUN_MODE === "build") {
+	// 		return false;
+	// 	}
+	// });
+
+	eleventyConfig.addPreprocessor("status", "*", (data, content) => {
+		if (["todo", "wip"].includes(data.status)) {
+			data.title = `${data.title} [${data.status}]`;
 		}
 
-		if(data.draft && process.env.ELEVENTY_RUN_MODE === "build") {
+		if(data.status == "todo" && process.env.ELEVENTY_RUN_MODE === "build") {
 			return false;
 		}
 	});

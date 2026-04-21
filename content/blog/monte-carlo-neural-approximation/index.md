@@ -2,6 +2,7 @@
 const title = "Monte-Carlo Neural Approximation with a Physics-Informed Neural Network";
 const date = "2026-03-10";
 const draft = false;
+const status = "wip";
 ---
 
 _Article en cours d'écriture._

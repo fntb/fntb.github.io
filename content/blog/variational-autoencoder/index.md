@@ -3,6 +3,7 @@ const title = "Variational Autoencoder";
 const description = "Comment dériver l'implémentation de VAE la plus répendue à partir du modèle mathématique.";
 const date = "2026-01-23";
 const draft = false;
+const status = "wip";
 ---
 
 ## Modèle
