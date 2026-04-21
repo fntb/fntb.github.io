@@ -272,10 +272,9 @@ def main():
 
 #### Résultats
 
-![](./linear_regression_learning_curves.png)
-![](./linear_regression_g.png)
-![](./linear_regression_v.png)
-![](./linear_regression_grad_v.png)
+{% plotly "./linear_regression_learning_curve.json", { type: "learning_curves" } %}
+{% plotly "./linear_regression_parameters.json", { type: "parameters" } %}
+{% plotly "./linear_regression_gradients.json", { type: "parameters", title: "Gradients" } %}
 
 
 <div style="page-break-after: always"></div>

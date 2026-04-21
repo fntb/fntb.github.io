@@ -104,7 +104,7 @@ export default async function(eleventyConfig) {
 		return (new Date()).toISOString();
 	});
 
-	eleventyConfig.addShortcode("plotly", function(relDataFile, title, type = "scatter") {
+	eleventyConfig.addShortcode("plotly", function(relDataFile, params = {}) {
 		const id = `plot-${Math.random().toString(36).substring(2, 9)}`;
 		const currentFileDir = path.dirname(this.page.inputPath);
 		const dataFile = path.resolve(currentFileDir, relDataFile);
@@ -115,8 +115,8 @@ export default async function(eleventyConfig) {
 				id="${id}" 
 				class="plotly-container" 
 				data-plotly="${encodeURIComponent(data)}"
-				data-title="${title}"
-				data-type="${type}">
+				data-title="${params.title || ''}"
+				data-type="${params.type || 'scatter'}">
 			</div>
 		`.trim();
 	});

@@ -5,13 +5,11 @@ const draft = false;
 const status = "wip";
 ---
 
-_Article en cours d'écriture._
-
 We use CUDA to generate european call option pricings in the VG model with a Monte-Carlo simulation. We then wrote python bindings to use torch to train a model to replicate the MC simulation results using data generated on-the-fly.
 
 Code : https://github.com/fntb/vg-model-nn-approximation
 
-{% plotly "./vg_process.json", "VG Process", "scatter" | safe %}
+{% plotly "./vg_process.json", { title: "VG Process" } %}
 
 ## Notes on the Loss
 
