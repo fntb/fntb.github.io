@@ -11,7 +11,7 @@ We use CUDA to generate european call option pricings in the VG model with a Mon
 
 Code : https://github.com/fntb/vg-model-nn-approximation
 
-![](./vg_process.png)
+{% plotly "./vg_process.json", "VG Process", "scatter" | safe %}
 
 ## Notes on the Loss
 

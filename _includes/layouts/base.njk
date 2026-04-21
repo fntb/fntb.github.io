@@ -24,6 +24,7 @@
 	    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.45/dist/katex.min.css" integrity="sha384-UA8juhPf75SzzAMA/4fo3yOU7sBJ0om7SCD2GHq0fZqZco6tr1UCV7nUbk9J90JM" crossorigin="anonymous">
 
 		<style>{% include "css/index.css" %}</style>
+		<style>{% include "css/foldable.css" %}</style>
 		{# <style>{% include "node_modules/something.css" %}</style> #}
 
 		{#- Render the CSS bundle using inlined CSS (for the fastest site performance in production) #}
@@ -34,6 +35,8 @@
 
 		{#- Add the heading-anchors web component to the JavaScript bundle #}
 		{#- <script type="module">{% include "node_modules/@zachleat/heading-anchors/heading-anchors.js" %}</script> #}
+		<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" defer></script>
+		<script src="/js/plots.js" defer></script>
 	</head>
 	<body>
 		<a href="#main" id="skip-link" class="visually-hidden">Skip to main content</a>

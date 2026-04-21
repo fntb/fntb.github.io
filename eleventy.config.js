@@ -5,8 +5,12 @@ import { eleventyImageTransformPlugin } from "@11ty/eleventy-img";
 
 import markdownIt from "markdown-it";
 import { katex } from "@mdit/plugin-katex";
+import { container } from "@mdit/plugin-container";
 
 import pluginFilters from "./_config/filters.js";
+
+import fs from "node:fs";
+import path from "node:path";
 
 export default async function(eleventyConfig) {
 	let options = {
@@ -15,18 +19,26 @@ export default async function(eleventyConfig) {
 		linkify: true,
 	};
 
-	const mdIt = markdownIt(options).use(katex);
+	const mdIt = markdownIt(
+		options
+	).use(
+		katex
+	).use(container, {
+		name: "foldable",
+		validate: function(params) {
+			return params.trim().match(/^\s*foldable\s*(.*)\s*$/);
+		},
+		openRender: function(tokens, idx) {
+			const m = tokens[idx].info.trim().match(/^\s*foldable\s*(.*)\s*$/);
+			const title = m[1] ? mdIt.utils.escapeHtml(m[1]) : "Details";
+			return `<details><summary> ${title} </summary>\n`;
+		},
+		closeRender: function(tokens, idx) {
+			return "</details>\n";
+		}
+	});
+
 	eleventyConfig.setLibrary("md", mdIt);
-
-	// eleventyConfig.addPreprocessor("drafts", "*", (data, content) => {
-	// 	if (data.draft) {
-	// 		data.title = `${data.title} [draft]`;
-	// 	}
-
-	// 	if(data.draft && process.env.ELEVENTY_RUN_MODE === "build") {
-	// 		return false;
-	// 	}
-	// });
 
 	eleventyConfig.addPreprocessor("status", "*", (data, content) => {
 		if (["todo", "wip"].includes(data.status)) {
@@ -40,10 +52,12 @@ export default async function(eleventyConfig) {
 
 	eleventyConfig
 		.addPassthroughCopy({
-			"./public/": "/"
+			"./public/": "/",
+			"./js/": "/js/"
 		})
 
 	eleventyConfig.addWatchTarget("css/**/*.css");
+	eleventyConfig.addWatchTarget("js/**/*.js");
 	eleventyConfig.addWatchTarget("content/**/*.{svg,webp,png,jpg,jpeg,gif}");
 
 	eleventyConfig.addBundle("css", {
@@ -90,20 +104,23 @@ export default async function(eleventyConfig) {
 		return (new Date()).toISOString();
 	});
 
-	eleventyConfig.addShortcode("plotly", function(data, layout = {}) {
-        const id = `plot-${Math.random().toString(36).substring(2, 9)}`;
-        
-        return `
-            <div id="${id}" style="width:100%; max-width:100%;"></div>
-            <script type="module">
-                import 'https://cdn.plot.ly/plotly-2.27.0.min.js';
-                Plotly.newPlot('${id}', ${JSON.stringify(data)}, ${JSON.stringify(layout)});
-            </script>
-        `;
-    });
+	eleventyConfig.addShortcode("plotly", function(relDataFile, title, type = "scatter") {
+		const id = `plot-${Math.random().toString(36).substring(2, 9)}`;
+		const currentFileDir = path.dirname(this.page.inputPath);
+		const dataFile = path.resolve(currentFileDir, relDataFile);
+		const data = fs.readFileSync(dataFile, 'utf8');
+
+		return `
+			<div 
+				id="${id}" 
+				class="plotly-container" 
+				data-plotly="${encodeURIComponent(data)}"
+				data-title="${title}"
+				data-type="${type}">
+			</div>
+		`.trim();
+	});
 };
-
-
 
 export const config = {
 	templateFormats: [

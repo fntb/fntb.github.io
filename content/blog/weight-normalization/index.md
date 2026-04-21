@@ -29,8 +29,9 @@ Remarquons de suite que cette reparamétrisation ne change en rien l'expressivit
 
 ## Analyse du gradient
 
-Considérons donc une telle couche linéaire normalisée
-$y = g \frac{v}{\|v\|} x + b$, pendant l'entraînement, on cherche à minimiser une erreur empirique d'une perte (fonction réelle) $l$ :
+::: foldable Dérivation des gradients
+
+Considérons donc une telle couche linéaire normalisée $y = g \frac{v}{\|v\|} x + b$, pendant l'entraînement, on cherche à minimiser une erreur empirique d'une perte (fonction réelle) $l$ :
 
 $$l = l(y, y^*)$$
 
@@ -93,6 +94,8 @@ $$\begin{aligned}
 > $$\nabla_w l = \frac{g}{\|v\|} P_v^\perp \nabla_y l x^\top = \frac{g}{\|v\|} P_v^\perp \nabla_w l$$
 
 <div style="page-break-after: always"></div>
+
+:::
 
 #### Observations
 
@@ -482,7 +485,11 @@ L'apprentissage n'est qu'anecdotiquement plus rapide que dans le cas de la batch
 
 <div style="page-break-after: always"></div>
 
-## Annexe : Single-Pass SGD
+## Annexe
+
+::: foldable Single-Pass SGD
+
+### Annexe : Single-Pass SGD
 
 Référence : [Optimization for Machine Learning, Raphaël Berthier - _Sorbonne University MS2A Lecture Notes 2026_](https://github.com/raphael-berthier/optim-notes/blob/main/notes.pdf)
 
@@ -542,9 +549,13 @@ $$\mathbb{E}[\|\theta_k - \theta^*\|^2] \le (1 - \gamma \mu)^k \|\theta_0 - \the
 
 Preuve : [Page 22 of Optimization for Machine Learning, Raphaël Berthier - _Sorbonne University MS2A Lecture Notes 2026_](https://github.com/raphael-berthier/optim-notes/blob/main/notes.pdf)
 
+:::
+
 <div style="page-break-after: always"></div>
 
-## Annexe : Borne de convergence de la SGD pour la régression linéaire
+::: foldable Borne de convergence de la SGD pour la régression linéaire
+
+### Annexe : Borne de convergence de la SGD pour la régression linéaire
 
 On ne peut malheureusement pas immédiatement appliquer le théorème de convergence précédemment cité puisque en régression linéaire multidimensionnelle $y = wx$ la fonction de perte est $l(w) = \frac{1}{2}\|wx - y\|^2$. Son gradient est $\nabla_w l = wxx^\top$ et sa hessienne $H_w l = x x^\top$ qui est de rang 1. Donc ses valeurs propres sont $\|x\|^2$ et $0$ (avec multiplicité $d-1$). Puisque la plus petite valeur propre est $0$ on a pas la forte convexité.
 
@@ -596,9 +607,13 @@ Pour faire simple dans notre expérience, on va échantilloner $x$ sous $\mathca
 
 $$\eta < \frac{2}{(2 + d) \tau^2}$$
 
+:::
+
 <div style="page-break-after: always"></div>
 
-## Annexe : Algèbre matricielle pour le calcul de gradient
+::: foldable Algèbre matricielle pour le calcul de gradient
+
+### Annexe : Algèbre matricielle pour le calcul de gradient
 
 On considère $A, B \in \mathbb{R}^{q \times p}$ ; $x, x' \in \mathbb{R}^p$ ; et $y \in \mathbb{R}^q$.
 
@@ -632,3 +647,5 @@ y^\top A x &= \sum_{i,j} y_i A_{ij} x_j = \sum_{i,j} y_i x_j A_{ij} \\
 &= \sum_{i,j} (xy^\top)_{ji} A_{ij} = \sum_{j} (xy^\top A)_{jj} \\
 &= \text{tr}(xy^\top A)
 \end{aligned}$$
+
+:::
