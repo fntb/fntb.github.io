@@ -116,7 +116,9 @@ export default async function(eleventyConfig) {
 				class="plotly-container" 
 				data-plotly="${encodeURIComponent(data)}"
 				data-title="${params.title || ''}"
-				data-type="${params.type || 'scatter'}">
+				data-type="${params.type || 'scatter'}"
+				data-smooth="${params.smooth || 'false'}"
+			>
 			</div>
 		`.trim();
 	});

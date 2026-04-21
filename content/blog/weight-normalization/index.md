@@ -351,23 +351,27 @@ On observe bien que la régression linéaire normalisée (i.e. obtenue en repara
 
 ##### Régression Linéaire avec $\eta = \frac{1}{2} \frac{1}{2 \tau^2}$
 
-![](./linear_lr0.5_learning_curve.png)
-![](./linear_lr0.5_loss.png)
+
+{% plotly "./eos_linear_0.5_learning_curve.json", { type: "learning_curves" } %}
+{% plotly "./eos_linear_0.5_loss_landscape.json", { type: "loss_landscape_2d" } %}
+
 
 ##### Régression Linéaire avec $\eta = \frac{1}{2 \tau^2}$
 
-![](./linear_lr1_learning_curve.png)
-![](./linear_lr1_loss.png)
+{% plotly "./eos_linear_1.0_learning_curve.json", { type: "learning_curves" } %}
+{% plotly "./eos_linear_1.0_loss_landscape.json", { type: "loss_landscape_2d" } %}
 
 ##### Régression Linéaire **Normalisée** avec $\eta = \frac{1}{2} \frac{1}{2 \tau^2}$
 
-![](./wnlinear_lr0.5_learning_curve.png)
-![](./wnlinear_lr0.5_loss.png)
+{% plotly "./eos_linear_normalized_0.5_learning_curve.json", { type: "learning_curves" } %}
+{% plotly "./eos_linear_normalized_0.5_learning_rate.json", { type: "parameters", title: "Effective Learning Rate" } %}
+{% plotly "./eos_linear_normalized_0.5_loss_landscape.json", { type: "loss_landscape_2d" } %}
 
 ##### Régression Linéaire **Normalisée** avec $\eta = \frac{1}{2 \tau^2}$
 
-![](./wnlinear_lr1_learning_curve.png)
-![](./wnlinear_lr1_loss.png)
+{% plotly "./eos_linear_normalized_1.0_learning_curve.json", { type: "learning_curves" } %}
+{% plotly "./eos_linear_normalized_1.0_learning_rate.json", { type: "parameters", title: "Effective Learning Rate" } %}
+{% plotly "./eos_linear_normalized_1.0_loss_landscape.json", { type: "loss_landscape_2d" } %}
 
 <div style="page-break-after: always"></div>
 
@@ -443,26 +447,23 @@ def main():
 
 ##### Sans normalisation
 
-![](./none_learning_curves.png)
-![](./none_w.png)
+
+{% plotly "./deep_model_none_learning_curve.json", { type: "learning_curves", smooth: true } %}
+{% plotly "./deep_model_none_gradients.json", { type: "parameters", title: "Gradient Norms", smooth: true } %}
 
 Le réseau ne parvient pas à apprendre, le gradient vanish dans les couches les plus anciennes, jusqu'à ce que la SGD s'installe dans un minimum local très mauvais.
 
 ##### Batch Normalization
 
-![](./bn_learning_curves.png)
-![](./bn_grad_w.png)
+{% plotly "./deep_model_batch_normalization_learning_curve.json", { type: "learning_curves", smooth: true } %}
+{% plotly "./deep_model_batch_normalization_gradients.json", { type: "parameters", title: "Gradient Norms", smooth: true } %}
 
 L'apprentissage est lent, très bruyant malgrès des batch de 100, mais le signal se propage très bien jusqu'aux premières couches. _C'est un peu difficile a voir mais la norme du gradient à la première couche est **plus élevée** que celle aux dernières couches._
 
 ##### Weight Normalization
 
-![](./wn_learning_curves_small.png)
-![](./wn_g_small.png)
-![](./wn_v_small.png)
-![](./wn_v.png)
-![](./wn_grad_v_small.png)
-![](./wn_grad_v.png)
+{% plotly "./deep_model_weight_normalization_learning_curve.json", { type: "learning_curves", smooth: true } %}
+{% plotly "./deep_model_weight_normalization_gradients.json", { type: "parameters", title: "Gradient Norms", smooth: true } %}
 
 L'apprentissage n'est qu'anecdotiquement plus rapide que dans le cas de la batch normalization mais existe bien. Les performances finales sont similaires. On observe cependant que le bénéfice de normalisation est légèrement moindre que celui de la batch normalization : le gradient est sain sur les 15 dernières couches, mais celui de la couche initiale est très faible initialement puis très mal conditionné. Cependant rappelons bien que l'on a travaillé avec des batch de 100, ce qui est très favorables à la batch normalization.
 
