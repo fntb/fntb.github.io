@@ -11,17 +11,15 @@ import pluginFilters from "./_config/filters.js";
 
 import fs from "node:fs";
 import path from "node:path";
+import crypto from "node:crypto";
 
 export default async function(eleventyConfig) {
-	let options = {
+
+	const mdIt = markdownIt({
 		html: true,
 		breaks: true,
 		linkify: true,
-	};
-
-	const mdIt = markdownIt(
-		options
-	).use(
+	}).use(
 		katex
 	).use(container, {
 		name: "foldable",
@@ -53,7 +51,6 @@ export default async function(eleventyConfig) {
 	eleventyConfig
 		.addPassthroughCopy({
 			"./public/": "/",
-			"./js/": "/js/"
 		})
 
 	eleventyConfig.addWatchTarget("css/**/*.css");
@@ -79,7 +76,7 @@ export default async function(eleventyConfig) {
 
 	eleventyConfig.addPlugin(eleventyImageTransformPlugin, {
 		formats: ["avif", "webp", "auto"],
-		// widths: ["auto"],
+		widths: ["auto"],
 
 		failOnError: false,
 		htmlOptions: {
@@ -96,8 +93,8 @@ export default async function(eleventyConfig) {
 
 	eleventyConfig.addPlugin(pluginFilters);
 	eleventyConfig.addPlugin(IdAttributePlugin, {
-		// slugify: eleventyConfig.getFilter("slugify"),
-		// selector: "h1,h2,h3,h4,h5,h6", // default
+		slugify: eleventyConfig.getFilter("slugify"),
+		selector: "h1,h2,h3,h4,h5,h6",
 	});
 
 	eleventyConfig.addShortcode("currentBuildDate", () => {
@@ -105,10 +102,12 @@ export default async function(eleventyConfig) {
 	});
 
 	eleventyConfig.addShortcode("plotly", function(relDataFile, params = {}) {
-		const id = `plot-${Math.random().toString(36).substring(2, 9)}`;
-		const currentFileDir = path.dirname(this.page.inputPath);
-		const dataFile = path.resolve(currentFileDir, relDataFile);
-		const data = fs.readFileSync(dataFile, 'utf8');
+		const inputDataFile = path.resolve(path.dirname(this.page.inputPath), relDataFile);
+		const outputDir = path.dirname(this.page.outputPath);
+		const outputUrl = path.dirname(this.page.url);
+
+		const data = fs.readFileSync(inputDataFile);
+		const id = crypto.hash("md5", data);
 
 		return `
 			<div 

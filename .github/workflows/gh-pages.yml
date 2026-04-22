@@ -53,7 +53,7 @@ jobs:
           key: ${{ runner.os }}-eleventy-fetch-cache
 
       - run: npm ci
-      - run: npm run build-ghpages
+      - run: npm run build
 
       - name: Upload static files as artifact
         id: deployment

@@ -1,3 +1,5 @@
+import Plotly from "plotly.js-dist-min"
+
 const getCSSVar = (varName) => {
     return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
 };
@@ -53,7 +55,7 @@ const traceBuilders = {
                     color: smooth ? fadedColor : baseColor
                 },
                 legendgroup: parameter_name,
-                showlegend: smooth
+                showlegend: true
             });
 
             if (smooth && y.length > 5) {
@@ -78,7 +80,8 @@ const traceBuilders = {
                         width: 2, 
                         color: baseColor 
                     },
-                    legendgroup: parameter_name
+                    legendgroup: parameter_name,
+                    showlegend: true
                 });
             }
 
@@ -139,7 +142,7 @@ const traceBuilders = {
 
 const layoutBuilders = {
     base: (title) => ({
-        title: title || "Plot",
+        title: { text: title || "Plot"},
         autosize: true,
         paper_bgcolor: getCSSVar("--background-color"),
         plot_bgcolor:  getCSSVar("--background-color"),

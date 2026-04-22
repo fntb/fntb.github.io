@@ -2,7 +2,7 @@ export default {
 	title: "Pierre(@fntb)'s ML Blog 👋",
 	url: "https://fntb.github.io/",
 	language: "fr",
-	description: "Quelques expériences de machine learning, en essayant de faire le lien entre math et code.",
+	description: "A collection of machine learning experiments, blending theory, experimentation, and implementation.",
 	author: {
 		name: "Pierre Fontbonne",
 		email: "pierre@lomail.org",

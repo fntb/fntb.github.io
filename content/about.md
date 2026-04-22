@@ -1,11 +1,14 @@
 ---js
 const eleventyNavigation = {
-	key: "À propos",
+	key: "About",
 	order: 2
 };
 ---
-# À propos
+# About
 
 {{ metadata.description }}
 
-Si vous voulez me parler machine learning, ou juste dire bonjour : {{ metadata.author.email }}
+<p>
+  Want to talk machine learning or just say hi ? 
+  <a href="mailto:{{ metadata.author.email }}">{{ metadata.author.email }}</a>
+</p>

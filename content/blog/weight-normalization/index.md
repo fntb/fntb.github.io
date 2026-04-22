@@ -107,11 +107,11 @@ $$\begin{aligned}
 \nabla_v l &= \frac{g}{\|v\|} P_v^\perp \nabla_y l x^\top \\
 \end{aligned}$$
 
-1. **$\nabla_g l$ ne dépend pas du tout de la norme de $v$.**
+1. $\nabla_g l$ ne dépend pas du tout de la norme de $v$.
 
-2. Dans l'update de la GD (descente de gradient) on a $v \leftarrow v - \eta \nabla_v l$ or $\|v - \eta \nabla_w l\|^2 = \sqrt{\|v\|^2 + \eta^2\frac{g^2}{\|v\|^2} \|\nabla_y l x^\top\|^2} \ge \|v\|$
+2. Dans l'update de la GD (descente de gradient) on a $v \leftarrow v - \eta \nabla_v l$ or $\|v - \eta \nabla_w l\| = \sqrt{\|v\|^2 + \eta^2\frac{g^2}{\|v\|^2} \|\nabla_y l x^\top\|^2} \ge \|v\|$
 
-Puisque 1. et 2. $\frac{g}{\|v\|}$, et donc $\nabla_v l$, sous l'effet de $v$ ne font que diminuer au fil de l'entrainement, on a donc apparition d'un **préconditionnement du gradient de $v$ qui agit comme stabilisateur**.
+Ainsi à $g$ fixé, le préconditionneur $\frac{g}{\|v\|}$ de $\nabla_v l$  ne fait que diminuer. Bien sûr $g$ peut varier et donc augmenter selon que l'objectif d'optimisation le nécessite, mais conditionnellement à ceci ce préconditionnement agit donc comme stabiliseur de $v$.
 
 <div style="page-break-after: always"></div>
 
@@ -162,7 +162,9 @@ Pour estimer les inconnues $\mathbb{E}x$ et $\operatorname{var}{x}$, on peut sim
 
 ## Experience : Validation des résultats mathématiques sur un problème simple
 
-On propose une expérience simple visant à valider les résultats mathématiques précédemment obtenus.
+On propose une expérience simple visant à valider les résultats et analyses mathématiques précédemment obtenues.
+
+Notre objectif va être d'analyser le comportement de $g$ et $\|v\|$. Déjà pour s'assurer que $\|v\|$ ne fasse en effet qu'augmenter, et ensuite pour voir si l'on parvient à observer la décroissance de $\frac{g}{\|v\|}$.
 
 On résout un problème de régression linéaire en dimension 32 (à 2) et on observe les valeurs de $g$, $\|v\|$, et surtout du pas de gradient effectif $\|\nabla_v\|$.
 
@@ -276,10 +278,20 @@ def main():
 {% plotly "./linear_regression_parameters.json", { type: "parameters" } %}
 {% plotly "./linear_regression_gradients.json", { type: "parameters", title: "Gradients" } %}
 
+Comme attendu $\|v\|$ est strictement croissante avec les epochs.
+
+Le gradient $\nabla_v l$ est assez bruillant et difficile à analyser (au delà de l'attendu $\nabla_v l \to 0$). Cependant à partir de l'epoch 100 on observe que $\|v\|$ continue d'augmenter lentement tandis que $g$ se stabilise autour d'une constante, on entre donc dans le cas de la décroissance de $\frac{g}{\|v\|}$. 
+
+Proche du paramètre optimal $\nabla_y l x^\top$ (i.e. gradient de $w$ sans conditionnement) devient dominé par la variance intrinsèque du gradient stochastique, la décroissance observée de $\frac{g}{\|v\|}$ vient donc en effet stabiliser le processur d'optimisation en réduisant le pas effectif de la descente de gradient. 
+
+Cette espérience valide donc les attendus mathématiques.
+
 
 <div style="page-break-after: always"></div>
 
 ## Expérience : Edge of Stability
+
+_Le nom de cette expérience est un clin d'oeil au papier que l'on aime beaucoup [Gradient Descent on Neural Networks Typically Occurs at the Edge of Stability, de Cohen et al.](https://arxiv.org/abs/2103.00065) mais n'a pas de relation avec celui-ci._
 
 On propose une expérience dont l'objectif est de mesurer et visualiser la rosbustesse au pas de gradient (learning rate) avec et sans weight normalization.
 
@@ -287,11 +299,70 @@ Pour pouvoir visualiser confortablement le chemin d'optimisation on considère u
 
 $$\underset{w \in \mathbb{R}^2}{\min} \mathbb{E} \|w^\top x - y\|^2$$
 
-où $y = w_*^\top x + \epsilon$ avec $\epsilon \sim \mathcal{N}(0, \sigma^2)$.
+où $y = w_*^\top x + \varepsilon$ avec $\varepsilon \sim \mathcal{N}(0, \sigma^2)$.
 
 Et on suppose avoir un jeu de donné $\set{(x_i, y_i)}_i$ i.i.d., tel que $x \sim \mathcal{N}(0, \tau^2)$ où $\tau^2$ est connu.
 
-On sait [annexe] que la SGD va pouvoir converger vers $w_*$ ssi $\eta < \frac{1}{2 \tau^2}$. L'idée est alors d'essayer d'apprendre $w_*$ à la limite de stabilité, c'est à dire lorsque $\eta \to \frac{1}{2 \tau^2}$. Pour ça on affiche le chemin d'optimisation pour plusieurs valeurs de $\eta$.
+On sait que la SGD va pouvoir converger vers $w_*$ ssi $\eta < \frac{1}{2 \tau^2}$. 
+
+
+::: foldable Preuve : Borne de convergence de la SGD pour la régression linéaire
+
+#### Borne de convergence de la SGD pour la régression linéaire
+
+On ne peut malheureusement pas immédiatement appliquer le théorème de convergence classique cité en annexe puisque en régression linéaire multidimensionnelle $y = wx$ la fonction de perte est $l(w) = \frac{1}{2}\|wx - y\|^2$. Son gradient est $\nabla_w l = wxx^\top$ et sa hessienne $H_w l = x x^\top$ qui est de rang 1. Donc ses valeurs propres sont $\|x\|^2$ et $0$ (avec multiplicité $d-1$). Puisque la plus petite valeur propre est $0$ on a pas la forte convexité.
+
+Heureusement dans ce cas simple on peut mener une analyse manuelle.
+
+Notons $w_*$ le paramètre optimal et plaçons nous à l'itération $i$ de la SGD Single-Pass.
+
+On a par hypohtèse de modélisation $y_i = w_* x_i + \varepsilon_i$ avec $\varepsilon_i \sim \mathcal{N}(0, \sigma^2)$.
+
+L'update de la SGD à cette itération est :
+
+$$w_{i+1} = w_i - \eta \nabla_{w_i} l = w_i - \eta w_i x_i x_i^\top$$
+
+Donc avec le vecteur erreur $v_i = w_i - w_*$ : 
+
+$$v_{i+1} = v_i (I - \eta x_i x_i^\top) - \eta (y_i - \varepsilon_i) x_i^\top$$
+
+Donc :
+
+$$\mathbb{E}[\|v_{i+1}\|^2] \propto \mathbb{E}\left[ v_i^\top (I - \eta x_ix_i^\top)^2 v_i \right]$$
+
+Puis en notant $\Sigma = \mathbb{E}[xx^\top]$ :
+
+$$\mathbb{E}[\|v_{i+1}\|^2] \propto \mathbb{E}\left[ v_i^\top \left( I - 2\eta \Sigma + \eta^2 \mathbb{E}[\|x_i\|^2 x_ix_i^\top] \right) v_i \right]$$
+
+_On ignore le terme de constante de variance due au bruit._
+
+Pour que l'on ait convergence, il faut que l'opérateur linéaire appliqué à $v_i$ agisse comme une contraction : 
+
+$$\left( I - 2\eta \Sigma + \eta^2 \mathbb{E}[\|x_i\|^2 x_ix_i^\top] \right) < I$$
+
+soit : 
+
+$$2\eta \Sigma - \eta^2 \mathbb{E}[\|x\|^2 xx^\top] > 0$$
+
+Ce qui nous donne donc la borne suivante pour le pas :
+
+$$\eta < \inf_{v \neq 0} \frac{2 v^\top \Sigma v}{v^\top \mathbb{E}[\|x\|^2 xx^\top] v}$$
+
+Maintenant si l'on suppose que les variables d'entrée suivent une loi normale $x \sim \mathcal{N}(0, \Sigma)$, on peut calculer que :
+
+$$\mathbb{E}[\|x\|^2 xx^\top] = 2\Sigma^2 + \text{Tr}(\Sigma)\Sigma$$
+
+Et donc en réinjectant on obtient la borne :
+
+$$\eta < \frac{2}{2\lambda_{max}(\Sigma) + \text{Tr}(\Sigma)}$$
+
+Pour faire simple dans notre expérience, on va échantilloner $x$ sous $\mathcal{N}(0, \tau^2 I)$ et on a donc la borne :
+
+$$\eta < \frac{2}{(2 + d) \tau^2}$$
+
+:::
+
+L'idée est donc d'essayer d'apprendre $w_*$ à la limite de stabilité, c'est à dire lorsque $\eta \to \frac{1}{2 \tau^2}$. Pour ça on affiche le chemin d'optimisation pour plusieurs valeurs de $\eta$.
 
 #### Implémentation
 
@@ -347,14 +418,10 @@ def main():
 
 #### Résultats
 
-On observe bien que la régression linéaire normalisée (i.e. obtenue en reparamétrant $w = g \frac{v}{\|v\|}$) reste notablement plus stable lorsque le learning rate atteind la limite théorique.
-
 ##### Régression Linéaire avec $\eta = \frac{1}{2} \frac{1}{2 \tau^2}$
-
 
 {% plotly "./eos_linear_0.5_learning_curve.json", { type: "learning_curves" } %}
 {% plotly "./eos_linear_0.5_loss_landscape.json", { type: "loss_landscape_2d" } %}
-
 
 ##### Régression Linéaire avec $\eta = \frac{1}{2 \tau^2}$
 
@@ -373,11 +440,15 @@ On observe bien que la régression linéaire normalisée (i.e. obtenue en repara
 {% plotly "./eos_linear_normalized_1.0_learning_rate.json", { type: "parameters", title: "Effective Learning Rate" } %}
 {% plotly "./eos_linear_normalized_1.0_loss_landscape.json", { type: "loss_landscape_2d" } %}
 
+On observe bien qu'avec ou sans normalisation, l'optimisation est un succès dans le cas $\eta$ ne vaut "que" $\frac{1}{2}$ de la borne de convergence.
+
+En revanche tandis que la régression linéaire non normalisée diverge immédiatement dans le cas ou $\eta$ est à la borne (stricte) de convergence, la reparamétrisation normalisée reste notablement plus stable : on l'observe osciller entre point optimal et ejection. Notons que dans ce cas (Unbatched SGD) on peut tout de même l'observer diverger si l'on laisse l'entrainement durer beaucoup plus d'epoch (certainement dû à une suite de gradient stochastiques particulièrement bruillants).
+
 <div style="page-break-after: always"></div>
 
 ## Expérience : Apprentissage profond par weight normalization
 
-On propose une expérience visant à valider que la weight normalization permet l'entraînement de réseaux profonds.
+On propose cette fois ci une expérience visant à valider que la weight normalization permet l'entraînement de réseaux profonds.
 
 Dans cette expérience on construit un MLP (Multi-Layer Perceptron) de 20 couches, sans connexions résiduelles, qu'on entraine pour apprendre l'identité $x \mapsto x$. 
 
@@ -451,37 +522,37 @@ def main():
 {% plotly "./deep_model_none_learning_curve.json", { type: "learning_curves", smooth: true } %}
 {% plotly "./deep_model_none_gradients.json", { type: "parameters", title: "Gradient Norms", smooth: true } %}
 
-Le réseau ne parvient pas à apprendre, le gradient vanish dans les couches les plus anciennes, jusqu'à ce que la SGD s'installe dans un minimum local très mauvais.
+Sans normalisation le réseau ne parvient pas à apprendre, le gradient disparait dans les couches les plus anciennes, jusqu'à ce que la SGD s'installe dans un minimum local très mauvais (visible puisque $\|\nabla_{w_{19}} l\| \underset{epoch}{\to} 0$).
 
 ##### Batch Normalization
 
 {% plotly "./deep_model_batch_normalization_learning_curve.json", { type: "learning_curves", smooth: true } %}
 {% plotly "./deep_model_batch_normalization_gradients.json", { type: "parameters", title: "Gradient Norms", smooth: true } %}
 
-L'apprentissage est lent, très bruyant malgrès des batch de 100, mais le signal se propage très bien jusqu'aux premières couches. _C'est un peu difficile a voir mais la norme du gradient à la première couche est **plus élevée** que celle aux dernières couches._
+Dans le cas de la batch normalization l'apprentissage est lent, et très bruyant malgrès des batch de 100, mais le signal se propage très bien jusqu'aux premières couches dès le début de l'entrainement. On le vérifie en observant que le gradient de première couche est plus grand que les autres dès le début de l'entrainement, sans qu'il s'agisse d'une explosion puisque le gradient en couche 5 est plus petit que celui en couche 10.
 
 ##### Weight Normalization
 
 {% plotly "./deep_model_weight_normalization_learning_curve.json", { type: "learning_curves", smooth: true } %}
 {% plotly "./deep_model_weight_normalization_gradients.json", { type: "parameters", title: "Gradient Norms", smooth: true } %}
 
-L'apprentissage n'est qu'anecdotiquement plus rapide que dans le cas de la batch normalization mais existe bien. Les performances finales sont similaires. On observe cependant que le bénéfice de normalisation est légèrement moindre que celui de la batch normalization : le gradient est sain sur les 15 dernières couches, mais celui de la couche initiale est très faible initialement puis très mal conditionné. Cependant rappelons bien que l'on a travaillé avec des batch de 100, ce qui est très favorables à la batch normalization.
+Enfin dans le cas de la weight normalization l'apprentissage est également possible, et anecdotiquement plus rapide, particulièrement initiallement, que dans le cas de la batch normalization. Les performances finales sont similaires. 
+
+On observe cependant que le bénéfice de la normalisation (pour la propagation du gradient) est légèrement moindre que dans le cas de la batch normalization. Le gradient est sain sur les 15 dernières couches, mais celui de la couche initiale est initiallement très faible, puis plus bruillant que dans le cas de la batch normalization. 
+
+Cependant rappelons bien que l'on a travaillé avec des **batch de 100**, ce qui est très favorables à la batch normalization.
 
 <div style="page-break-after: always"></div>
 
 ## Ouvertures et aller plus loin
 
-#### Analyse spectrale de la Hessienne
+Quelques directions pour de futures analyses, que l'on ne couvrira pas dans cet article.
 
-#### Composition de la weight normalization avec la mean-only batch normalization
-
-#### Comparaison aux méthodes de normalization courante - layer normalization
-
-#### La niche RL
-
-#### La weight standardization
-
-#### Reparametrisation des mécanismes d'attentions
+1. Analyse spectrale de la Hessienne
+2. Composition de la weight normalization avec la mean-only batch normalization
+3. Comparaison avec la méthode de normalization la plus répendue - layer normalization
+4. Applications actuelles de la weight normalization : GANs and VAEs, RL, NAS
+5. La weight standardization
 
 <div style="page-break-after: always"></div>
 
@@ -553,63 +624,6 @@ Preuve : [Page 22 of Optimization for Machine Learning, Raphaël Berthier - _Sor
 
 <div style="page-break-after: always"></div>
 
-::: foldable Borne de convergence de la SGD pour la régression linéaire
-
-### Annexe : Borne de convergence de la SGD pour la régression linéaire
-
-On ne peut malheureusement pas immédiatement appliquer le théorème de convergence précédemment cité puisque en régression linéaire multidimensionnelle $y = wx$ la fonction de perte est $l(w) = \frac{1}{2}\|wx - y\|^2$. Son gradient est $\nabla_w l = wxx^\top$ et sa hessienne $H_w l = x x^\top$ qui est de rang 1. Donc ses valeurs propres sont $\|x\|^2$ et $0$ (avec multiplicité $d-1$). Puisque la plus petite valeur propre est $0$ on a pas la forte convexité.
-
-Heureusement dans ce cas simple on peut mener une analyse manuelle.
-
-Notons $w_*$ le paramètre optimal et plaçons nous à l'itération $i$ de la SGD Single-Pass.
-
-On a par hypohtèse de modélisation $y_i = w_* x_i + \varepsilon_i$ avec $\varepsilon_i \sim \mathcal{N}(0, \sigma^2)$.
-
-L'update de la SGD à cette itération est :
-
-$$w_{i+1} = w_i - \eta \nabla_{w_i} l = w_i - \eta w_i x_i x_i^\top$$
-
-Donc avec le vecteur erreur $v_i = w_i - w_*$ : 
-
-$$v_{i+1} = v_i (I - \eta x_i x_i^\top) - \eta (y_i - \varepsilon_i) x_i^\top$$
-
-Donc :
-
-$$\mathbb{E}[\|v_{i+1}\|^2] \propto \mathbb{E}\left[ v_i^\top (I - \eta x_ix_i^\top)^2 v_i \right]$$
-
-Puis en notant $\Sigma = \mathbb{E}[xx^\top]$ :
-
-$$\mathbb{E}[\|v_{i+1}\|^2] \propto \mathbb{E}\left[ v_i^\top \left( I - 2\eta \Sigma + \eta^2 \mathbb{E}[\|x_i\|^2 x_ix_i^\top] \right) v_i \right]$$
-
-_On ignore le terme de constante de variance due au bruit._
-
-Pour que l'on ait convergence, il faut que l'opérateur linéaire appliqué à $v_i$ agisse comme une contraction : 
-
-$$\left( I - 2\eta \Sigma + \eta^2 \mathbb{E}[\|x_i\|^2 x_ix_i^\top] \right) < I$$
-
-soit : 
-
-$$2\eta \Sigma - \eta^2 \mathbb{E}[\|x\|^2 xx^\top] > 0$$
-
-Ce qui nous donne donc la borne suivante pour le pas :
-
-$$\eta < \inf_{v \neq 0} \frac{2 v^\top \Sigma v}{v^\top \mathbb{E}[\|x\|^2 xx^\top] v}$$
-
-Maintenant si l'on suppose que les variables d'entrée suivent une loi normale $x \sim \mathcal{N}(0, \Sigma)$, on peut calculer que :
-
-$$\mathbb{E}[\|x\|^2 xx^\top] = 2\Sigma^2 + \text{Tr}(\Sigma)\Sigma$$
-
-Et donc en réinjectant on obtient la borne :
-
-$$\eta < \frac{2}{2\lambda_{max}(\Sigma) + \text{Tr}(\Sigma)}$$
-
-Pour faire simple dans notre expérience, on va échantilloner $x$ sous $\mathcal{N}(0, \tau^2 I)$ et on a donc la borne :
-
-$$\eta < \frac{2}{(2 + d) \tau^2}$$
-
-:::
-
-<div style="page-break-after: always"></div>
 
 ::: foldable Algèbre matricielle pour le calcul de gradient
 
